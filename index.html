@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BookMyService | Professional</title>
-   <link rel="stylesheet" href="./style.css">  
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="./style.css">  
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="dark-theme">
     <nav class="navbar">
-        <div class="logo">Book<span>My</span>Service</div>
+        <div class="logo"><i class="fas fa-bolt" style="color:#3b82f6; margin-right:8px;"></i>Book<span>My</span>Service</div>
     </nav>
 
     <div class="container">
@@ -20,28 +20,28 @@
 
         <section class="search-card card">
             <div class="input-group">
-                <label>Location</label>
+                <label><i class="fas fa-map-marker-alt"></i> Location</label>
                 <select id="citySelect"><option value="">Loading...</option></select>
             </div>
             <div class="input-group">
-                <label>Service Needed</label>
+                <label><i class="fas fa-tools"></i> Service Needed</label>
                 <select id="serviceSelect"><option value="">Loading...</option></select>
             </div>
             <button id="findBtn" class="main-btn">Find Experts</button>
         </section>
 
         <section id="resultsSection" class="results-area hidden">
-            <h3 class="section-title">Verified Professionals</h3>
+            <h3 class="section-title"><i class="fas fa-star" style="color: gold;"></i> Verified Professionals</h3>
             <div id="providerList" class="provider-grid"></div>
         </section>
 
         <section class="card">
-            <h3 class="section-title">Recent Activity</h3>
+            <h3 class="section-title"><i class="fas fa-history"></i> Recent Activity</h3>
             <div id="myBookings" class="booking-list"></div>
         </section>
 
-        <section class="card" style="margin-top: 20px; border-top: 2px solid #3b82f6;">
-            <h3 class="section-title">Provider Dashboard</h3>
+        <section class="card" style="margin-top: 20px; border-top: 3px solid #3b82f6;">
+            <h3 class="section-title"><i class="fas fa-user-shield"></i> Provider Dashboard</h3>
             <div id="loginArea">
                 <div class="input-group">
                     <label>Phone Number</label>
@@ -50,12 +50,13 @@
                 <button id="providerLoginBtn" class="main-btn">Login as Provider</button>
             </div>
             <div id="providerDashboard" class="hidden">
-                <h4 id="welcomeMsg" style="color:#3b82f6"></h4>
+                <h4 id="welcomeMsg" style="color:#3b82f6; margin-bottom:15px;"></h4>
                 <div id="providerBookings" class="booking-list"></div>
-                <button onclick="location.reload()" class="main-btn" style="background:#475569; margin-top:10px;">Logout</button>
+                <button onclick="location.reload()" class="main-btn" style="background:#475569; margin-top:15px; height: auto; padding: 10px;">Logout</button>
             </div>
         </section>
     </div>
+
     <script type="module" src="app.js"></script>
 </body>
 </html>
