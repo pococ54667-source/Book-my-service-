@@ -40,13 +40,20 @@
 
         <section class="booking-section">
             <h3 class="section-title">Recent Activity</h3>
-            <div id="myBookings" class="booking-list">
-                <div class="empty-state">No active requests.</div>
-            </div>
-        </section>
+            <section class="card provider-login-section">
+    <h3 class="section-title">Provider Dashboard</h3>
+    <div id="loginArea">
+        <div class="input-group">
+            <label>Provider Phone Number</label>
+            <input type="tel" id="providerPhone" placeholder="Enter your registered phone">
+        </div>
+        <button id="providerLoginBtn" class="main-btn">Login as Provider</button>
     </div>
-
-    <script type="module" src="app.js"></script>
-</body>
-            </html>
+    
+    <div id="providerDashboard" class="hidden">
+        <h4 id="welcomeMsg">Welcome</h4>
+        <div id="providerBookings" class="booking-list"></div>
+        <button onclick="location.reload()" class="main-btn" style="background:#475569; margin-top:10px;">Logout</button>
+    </div>
+            </section>
             
