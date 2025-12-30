@@ -52,30 +52,20 @@ document.getElementById('providerLoginBtn').onclick = async () => {
 };
 
 async function loadProvBookings(pid) {
-    const { data: b } = await supabase.from('bookings').select('*, services(name)').eq('provider_id', pid);
-    document.getElementById('providerBookings').innerHTML = b.map(i => `
+    // Isme .neq('status', 'completed') add kiya hai taaki khatam kaam na dikhe
+    const { data: b } = await supabase.from('bookings')
+        .select('*, services(name)')
+        .eq('provider_id', pid)
+        .neq('status', 'completed'); 
+
+    document.getElementById('providerBookings').innerHTML = b.length ? b.map(i => `
         <div class="provider-card" style="flex-direction:column; align-items:start;">
-            <b>${i.services.name} - ${i.user_name}</b>
+            <b>${i.services?.name} - ${i.user_name}</b>
+            <div style="font-size:0.8rem; margin:5px 0;">Phone: ${i.user_phone}</div>
             <div style="display:flex; gap:10px; margin-top:10px;">
-                <button onclick="window.updStatus('${i.id}','confirmed','${pid}')" class="main-btn" style="padding:5px">Confirm</button>
-                <button onclick="window.updStatus('${i.id}','completed','${pid}')" class="main-btn" style="padding:5px; background:green">Done</button>
+                <button onclick="window.updStatus('${i.id}','confirmed','${pid}')" class="main-btn" style="padding:5px; background:#1e40af;">Confirm</button>
+                <button onclick="window.updStatus('${i.id}','completed','${pid}')" class="main-btn" style="padding:5px; background:#16a34a;">Done</button>
             </div>
-        </div>`).join('');
-}
-
-window.updStatus = async (bid, st, pid) => {
-    await supabase.from('bookings').update({ status: st }).eq('id', bid);
-    loadProvBookings(pid);
-    refreshBookings();
-};
-
-async function refreshBookings() {
-    const { data: b } = await supabase.from('bookings').select('*, services(name), providers(name)').order('created_at', {ascending: false}).limit(5);
-    document.getElementById('myBookings').innerHTML = b.map(i => `
-        <div class="provider-card">
-            <div><b>${i.services?.name}</b><br><small>${i.providers?.name}</small></div>
-            <span class="badge ${i.status}">${i.status}</span>
-        </div>`).join('');
-}
-init();
-        
+        </div>`).join('') : '<p>No active bookings.</p>';
+                                                                        }
+                
