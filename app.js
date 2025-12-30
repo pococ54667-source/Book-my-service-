@@ -53,16 +53,36 @@ document.getElementById('findBtn').onclick = async () => {
 };
 
 // 3. Booking Logic
-const { error } = await supabase
-    .from('bookings')
-    .insert([{ 
-        provider_id: id, 
-        user_name: formValues.user_name, 
-        user_phone: formValues.user_phone,
-        city_id: document.getElementById('citySelect').value,
-        service_id: document.getElementById('serviceSelect').value,
-        status: 'pending' 
-    }]);
+window.bookProvider = async (id, name) => {
+    const { value: formValues } = await Swal.fire({
+        title: `Booking: ${name}`,
+        html:
+            `<input id="swal-input1" class="swal2-input" placeholder="Full Name">` +
+            `<input id="swal-input2" class="swal2-input" placeholder="Mobile Number" type="tel">`,
+        focusConfirm: false,
+        confirmButtonText: 'Confirm Booking',
+        confirmButtonColor: '#3b82f6',
+        preConfirm: () => {
+            const user_name = document.getElementById('swal-input1').value;
+            const user_phone = document.getElementById('swal-input2').value;
+            if (!user_name || !user_phone) {
+                Swal.showValidationMessage('Please provide your name and contact number');
+            }
+            return { user_name, user_phone };
+        }
+    });
+
+    if (formValues) {
+        const { error } = await supabase
+            .from('bookings')
+            .insert([{ 
+                provider_id: id, 
+                user_name: formValues.user_name, 
+                user_phone: formValues.user_phone,
+                city_id: document.getElementById('citySelect').value,
+                service_id: document.getElementById('serviceSelect').value,
+                status: 'pending' 
+            }]);
 
         if (error) {
             Swal.fire('Error', 'Unable to process booking. Try again.', 'error');
@@ -78,7 +98,7 @@ const { error } = await supabase
         }
     }
 };
-        
+
 // 4. Provider Dashboard Login
 document.getElementById('providerLoginBtn').onclick = async () => {
     const ph = document.getElementById('providerPhone').value.trim();
@@ -99,8 +119,8 @@ async function loadProvBookings(pid) {
     const { data: b } = await supabase.from('bookings').select('*, services(name)').eq('provider_id', pid).neq('status', 'completed');
     document.getElementById('providerBookings').innerHTML = b.length ? b.map(i => `
         <div class="provider-card" style="flex-direction:column; align-items:start;">
-            <b>${i.services?.name} - ${i.customer_name}</b>
-            <div style="font-size:0.8rem; margin:5px 0;">Contact: ${i.customer_phone}</div>
+            <b>${i.services?.name} - ${i.user_name}</b>
+            <div style="font-size:0.8rem; margin:5px 0;">Contact: ${i.user_phone}</div>
             <div style="display:flex; gap:10px; margin-top:10px;">
                 <button onclick="window.updStatus('${i.id}','confirmed','${pid}')" class="main-btn" style="padding:5px; background:#1e40af;">Confirm</button>
                 <button onclick="window.updStatus('${i.id}','completed','${pid}')" class="main-btn" style="padding:5px; background:#16a34a;">Mark Done</button>
