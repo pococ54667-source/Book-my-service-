@@ -1,39 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Book My Service</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book My Service</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="app.js"></script>
 </head>
 <body>
 
-<header class="navbar">
-  <div class="logo">BookMyService</div>
-  <div class="menu">
-    <a href="#">Help</a>
-    <a href="#">Customer Support</a>
-    <a href="#">Terms & Conditions</a>
-  </div>
-</header>
+    <nav><b>BookMyService</b></nav>
 
-<section class="hero">
-  <div class="hero-content">
-    <h1>Trusted Home Services Across India</h1>
-    <p>Plumber • Electrician • AC Repair • Cleaning • Carpenter</p>
-    <a href="city.html" class="primary-btn">Get Services</a>
-  </div>
-</section>
+    <div class="container">
+        <section class="card">
+            <h3>Find a Professional</h3>
+            <div class="form-group">
+                <select id="citySelect"><option value="">Select City</option></select>
+                <select id="serviceSelect"><option value="">Select Service</option></select>
+                <button id="findBtn">Get Services</button>
+            </div>
+        </section>
 
-<section class="features">
-  <div class="card">✔ Verified Professionals</div>
-  <div class="card">✔ Quick Booking</div>
-  <div class="card">✔ Affordable Pricing</div>
-</section>
+        <section id="resultsSection" class="hidden">
+            <h3>Available Providers</h3>
+            <div id="providerList"></div>
+        </section>
 
-<footer class="footer">
-  © 2025 BookMyService. All Rights Reserved.
-</footer>
+        <section class="card">
+            <h3>My Booking Status</h3>
+            <div id="myBookings">
+                <p class="empty-msg">No active bookings found.</p>
+            </div>
+        </section>
+    </div>
 
 </body>
-</html>
+                  </html>
+                  
