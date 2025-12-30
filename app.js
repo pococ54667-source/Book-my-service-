@@ -79,4 +79,76 @@ async function refreshBookings() {
     }
 }
 init();
-                                                                        
+     // Provider Login & Dashboard Logic
+const loginArea = document.getElementById('loginArea');
+const providerDashboard = document.getElementById('providerDashboard');
+const providerPhoneInput = document.getElementById('providerPhone');
+const providerLoginBtn = document.getElementById('providerLoginBtn');
+const providerBookingsList = document.getElementById('providerBookings');
+
+providerLoginBtn.onclick = async () => {
+    const phone = providerPhoneInput.value;
+    if(!phone) return Swal.fire('Error', 'Please enter your phone number', 'error');
+
+    // Check if provider exists
+    const { data: provider, error } = await supabase
+        .from('providers')
+        .select('*')
+        .eq('phone', phone)
+        .single();
+
+    if(error || !provider) {
+        return Swal.fire('Error', 'Provider not found with this number', 'error');
+    }
+
+    // Login Success
+    loginArea.classList.add('hidden');
+    providerDashboard.classList.remove('hidden');
+    document.getElementById('welcomeMsg').innerText = `Welcome, ${provider.name}`;
+    loadProviderBookings(provider.id);
+};
+
+async function loadProviderBookings(pId) {
+    const { data: bookings } = await supabase
+        .from('bookings')
+        .select('*, services(name)')
+        .eq('provider_id', pId)
+        .order('created_at', { ascending: false });
+
+    if(bookings.length === 0) {
+        providerBookingsList.innerHTML = '<p>No bookings assigned to you.</p>';
+        return;
+    }
+
+    providerBookingsList.innerHTML = bookings.map(b => `
+        <div class="provider-card" style="flex-direction:column; align-items:flex-start; gap:10px;">
+            <div style="width:100%; display:flex; justify-content:space-between;">
+                <b>${b.services.name}</b>
+                <span class="badge ${b.status}">${b.status}</span>
+            </div>
+            <div style="font-size:0.9rem;">
+                Client: ${b.user_name} <br>
+                Phone: <a href="tel:${b.user_phone}" style="color:var(--accent);">${b.user_phone}</a>
+            </div>
+            <div style="display:flex; gap:10px; width:100%;">
+                <button onclick="updateStatus('${b.id}', 'confirmed', ${pId})" class="main-btn" style="padding:5px; font-size:0.8rem; background:#1e40af;">Confirm</button>
+                <button onclick="updateStatus('${b.id}', 'completed', ${pId})" class="main-btn" style="padding:5px; font-size:0.8rem; background:#166534;">Mark Done</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Status Update Function
+window.updateStatus = async (bookingId, newStatus, pId) => {
+    const { error } = await supabase
+        .from('bookings')
+        .update({ status: newStatus })
+        .eq('id', bookingId);
+
+    if(!error) {
+        Swal.fire('Updated', `Booking marked as ${newStatus}`, 'success');
+        loadProviderBookings(pId); // List refresh
+        refreshBookings(); // User side refresh
+    }
+};
+       
