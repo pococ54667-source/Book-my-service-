@@ -28,7 +28,7 @@ async function init() {
     } catch (e) { console.error("Load Error:", e); }
 }
 
-// 2. Search Experts (With Professional Validation)
+// 2. Search Experts
 document.getElementById('findBtn').onclick = async () => {
     const city = document.getElementById('citySelect').value;
     const service = document.getElementById('serviceSelect').value;
@@ -52,7 +52,7 @@ document.getElementById('findBtn').onclick = async () => {
         </div>`).join('') : '<p style="padding:10px; color:#94a3b8;">No experts found in this area.</p>';
 };
 
-// 3. Booking Logic (Professional English)
+// 3. Booking Logic
 window.bookProvider = async (id, name) => {
     const { value: formValues } = await Swal.fire({
         title: `Booking: ${name}`,
@@ -133,12 +133,12 @@ window.updStatus = async (bid, st, pid) => {
     refreshBookings();
 };
 
-// 6. Recent Activity (Smart Sense: Limit to 3 items only)
+// 6. Recent Activity (Limit to 3 items)
 async function refreshBookings() {
     const { data: b } = await supabase.from('bookings')
         .select('*, services(name), providers(name)')
         .order('created_at', {ascending: false})
-        .limit(3); // SIRF 3 TAK LIMIT KIYA TAKI PAGE LAMBA NA HO
+        .limit(3);
 
     if(b) {
         document.getElementById('myBookings').innerHTML = b.map(i => {
@@ -152,4 +152,3 @@ async function refreshBookings() {
 }
 
 init();
-            
