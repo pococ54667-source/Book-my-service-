@@ -52,47 +52,19 @@ document.getElementById('providerLoginBtn').onclick = async () => {
 };
 
 async function loadProvBookings(pid) {
-    const { data: b } = await supabase.from('bookings').select('*, services(name)')
-        .eq('provider_id', pid).neq('status', 'completed');
+    const { data: b } = await supabase.from('bookings')
+        .select('*, services(name)')
+        .eq('provider_id', pid)
+        .neq('status', 'completed'); 
 
-    const list = document.getElementById('providerBookings');
-    if (b && b.length > 0) {
-        list.innerHTML = b.map(i => `
-            <div class="provider-card" style="flex-direction:column; align-items:start;">
-                <b>${i.services?.name} - ${i.user_name}</b>
-                <div style="font-size:0.8rem; margin:5px 0;">Phone: ${i.user_phone}</div>
-                <div style="display:flex; gap:10px; margin-top:10px;">
-                    <button onclick="window.updStatus('${i.id}','confirmed','${pid}')" class="main-btn" style="padding:5px; background:#1e40af;">Confirm</button>
-                    <button onclick="window.updStatus('${i.id}','completed','${pid}')" class="main-btn" style="padding:5px; background:#16a34a;">Done</button>
-                </div>
-            </div>`).join('');
-    } else {
-        list.innerHTML = '<p>No active bookings.</p>';
-    }
-}
-
-window.updStatus = async (bid, st, pid) => {
-    const { error } = await supabase.from('bookings').update({ status: st }).eq('id', bid);
-    if(!error) {
-        Swal.fire({title: 'Updated!', icon: 'success', background: '#1e293b', color: '#fff'});
-        loadProvBookings(pid);
-        refreshBookings();
-    }
-};
-
-async function refreshBookings() {
-    const { data: b } = await supabase.from('bookings').select('*, services(name), providers(name)')
-        .order('created_at', {ascending: false}).limit(5);
+    document.getElementById('providerBookings').innerHTML = b.length ? b.map(i => `
+        <div class="provider-card" style="flex-direction:column; align-items:start;">
+            <b>${i.services?.name} - ${i.user_name}</b>
+            <div style="font-size:0.8rem; margin:5px 0;">Phone: ${i.user_phone}</div>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button onclick="window.updStatus('${i.id}','confirmed','${pid}')" class="main-btn" style="padding:5px; background:#1e40af;">Confirm</button>
+                <button onclick="window.updStatus('${i.id}','completed','${pid}')" class="main-btn" style="padding:5px; background:#16a34a;">Done</button>
+            </div>
+        </div>`).join('') : '<p>No active bookings.</p>';
+                                                                                                }
     
-    const activityList = document.getElementById('myBookings');
-    if(activityList && b) {
-        activityList.innerHTML = b.map(i => `
-            <div class="provider-card">
-                <div><b>${i.services?.name}</b><br><small>${i.providers?.name}</small></div>
-                <span class="badge ${i.status}">${i.status}</span>
-            </div>`).join('');
-    }
-}
-init();
-    
-                
