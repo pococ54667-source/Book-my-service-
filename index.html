@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Home Services</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+}
+.container{
+  max-width:600px;
+  margin:20px auto;
+  background:#fff;
+  padding:20px;
+  border-radius:8px;
+}
+h1{
+  text-align:center;
+}
+select,button{
+  width:100%;
+  padding:12px;
+  margin-top:12px;
+  font-size:16px;
+}
+button{
+  background:#2563eb;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+}
+.provider{
+  border:1px solid #ddd;
+  padding:12px;
+  border-radius:6px;
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>Find Services</h1>
+
+  <select id="city">
+    <option value="">Select City</option>
+  </select>
+
+  <select id="service">
+    <option value="">Select Service</option>
+  </select>
+
+  <button onclick="searchProviders()">Search</button>
+
+  <div id="list"></div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://hjpvadozhrdjugfrcffv.supabase.co";
+const SUPABASE_KEY = "sb_publishable_VWRFCLxoBE75MYve7W5jhw_PedtT83O";
+
+const supabase = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+async function loadFilters(){
+  const { data } = await supabase
+    .from("providers")
+    .select("city_id, service_id");
+
+  const cities = [...new Set(data.map(d => d.city_id))];
+  const services = [...new Set(data.map(d => d.service_id))];
+
+  cities.forEach(c=>{
+    city.innerHTML += `<option value="${c}">City ${c}</option>`;
+  });
+
+  services.forEach(s=>{
+    service.innerHTML += `<option value="${s}">Service ${s}</option>`;
+  });
+}
+
+async function searchProviders(){
+  list.innerHTML = "Loading...";
+
+  const c = city.value;
+  const s = service.value;
+
+  const { data, error } = await supabase
+    .from("providers")
+    .select("*")
+    .eq("city_id", c)
+    .eq("service_id", s)
+    .eq("status", "active");
+
+  if(error){
+    list.innerHTML = error.message;
+    return;
+  }
+
+  list.innerHTML = "";
+
+  if(data.length === 0){
+    list.innerHTML = "No providers found";
+    return;
+  }
+
+  data.forEach(p=>{
+    list.innerHTML += `
+      <div class="provider">
+        <b>${p.name}</b><br>
+        Phone: ${p.phone}<br>
+        Area: ${p.area}<br>
+        Experience: ${p.experience}
+      </div>
+    `;
+  });
+}
+
+loadFilters();
+</script>
+
+</body>
+                                  </html>
