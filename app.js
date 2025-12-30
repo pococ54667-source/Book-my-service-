@@ -1,6 +1,5 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-
 const SUPABASE_URL = "https://hjpvadozhrdjugfrcffv.supabase.co";
 const SUPABASE_KEY = "sb_publishable_VWRFCLxoBE75MYve7W5jhw_PedtT83O";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -8,7 +7,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const citySelect = document.getElementById('citySelect');
 const serviceSelect = document.getElementById('serviceSelect');
 const providerList = document.getElementById('providerList');
-
 
 async function init() {
     const { data: c } = await supabase.from('cities').select('*');
@@ -23,7 +21,6 @@ async function init() {
     refreshBookings();
 }
 
-
 document.getElementById('findBtn').onclick = async () => {
     const { data: p } = await supabase.from('providers').select('*')
         .eq('city_id', citySelect.value)
@@ -36,7 +33,6 @@ document.getElementById('findBtn').onclick = async () => {
             <button class="main-btn" style="width:auto; padding:8px" onclick="window.bookProvider('${i.id}','${i.name}')">Book</button>
         </div>`).join('') : '<p>No experts found.</p>';
 };
-
 
 window.bookProvider = async (id, name) => {
     const { value: f } = await Swal.fire({
@@ -51,7 +47,6 @@ window.bookProvider = async (id, name) => {
     }
 };
 
-
 document.getElementById('providerLoginBtn').onclick = async () => {
     const ph = document.getElementById('providerPhone').value.trim();
     const { data: pList } = await supabase.from('providers').select('*').eq('phone', ph);
@@ -65,7 +60,6 @@ document.getElementById('providerLoginBtn').onclick = async () => {
         Swal.fire('Error', 'Provider Not Found', 'error'); 
     }
 };
-
 
 async function loadProvBookings(pid) {
     const { data: b } = await supabase.from('bookings').select('*, services(name)')
@@ -84,13 +78,11 @@ async function loadProvBookings(pid) {
         </div>`).join('') : '<p>No active bookings.</p>';
 }
 
-
 window.updStatus = async (bid, st, pid) => {
     await supabase.from('bookings').update({ status: st }).eq('id', bid);
     loadProvBookings(pid);
     refreshBookings();
 };
-
 
 async function refreshBookings() {
     const { data: b } = await supabase.from('bookings').select('*, services(name), providers(name)')
@@ -107,4 +99,4 @@ async function refreshBookings() {
 }
 
 init();
-    
+            
