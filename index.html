@@ -3,37 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book My Service</title>
+    <title>BookMyService | Premium</title>
     <link rel="stylesheet" href="style.css">
-    <script type="module" src="app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
 </head>
-<body>
+<body class="dark-theme">
 
-    <nav><b>BookMyService</b></nav>
+    <nav class="navbar">
+        <div class="logo">Book<span>My</span>Service</div>
+    </nav>
 
     <div class="container">
-        <section class="card">
-            <h3>Find a Professional</h3>
-            <div class="form-group">
-                <select id="citySelect"><option value="">Select City</option></select>
-                <select id="serviceSelect"><option value="">Select Service</option></select>
-                <button id="findBtn">Get Services</button>
+        <header class="hero">
+            <h1>Expert Services, <span>One Tap Away.</span></h1>
+            <p>Find the highest-rated professionals in your city.</p>
+        </header>
+
+        <section class="search-card card">
+            <div class="input-group">
+                <label>Location</label>
+                <select id="citySelect"><option value="">Detecting City...</option></select>
             </div>
+            <div class="input-group">
+                <label>Service Needed</label>
+                <select id="serviceSelect"><option value="">What do you need?</option></select>
+            </div>
+            <button id="findBtn" class="main-btn">Find Experts</button>
         </section>
 
-        <section id="resultsSection" class="hidden">
-            <h3>Available Providers</h3>
-            <div id="providerList"></div>
+        <section id="resultsSection" class="results-area hidden">
+            <h3 class="section-title">Verified Professionals</h3>
+            <div id="providerList" class="provider-grid"></div>
         </section>
 
-        <section class="card">
-            <h3>My Booking Status</h3>
-            <div id="myBookings">
-                <p class="empty-msg">No active bookings found.</p>
+        <section class="booking-section">
+            <h3 class="section-title">Recent Activity</h3>
+            <div id="myBookings" class="booking-list">
+                <div class="empty-state">No active requests.</div>
             </div>
         </section>
     </div>
 
+    <script type="module" src="app.js"></script>
 </body>
-                  </html>
-                  
+            </html>
+            
