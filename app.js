@@ -1,5 +1,6 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
+
 const SUPABASE_URL = "https://hjpvadozhrdjugfrcffv.supabase.co";
 const SUPABASE_KEY = "sb_publishable_VWRFCLxoBE75MYve7W5jhw_PedtT83O";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -7,25 +8,35 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const citySelect = document.getElementById('citySelect');
 const serviceSelect = document.getElementById('serviceSelect');
 const providerList = document.getElementById('providerList');
-const resultsSection = document.getElementById('resultsSection');
+
 
 async function init() {
     const { data: c } = await supabase.from('cities').select('*');
     const { data: s } = await supabase.from('services').select('*');
-    if(citySelect) citySelect.innerHTML = '<option value="">Select City</option>' + c.map(i=>`<option value="${i.id}">${i.name}</option>`).join('');
-    if(serviceSelect) serviceSelect.innerHTML = '<option value="">Select Service</option>' + s.map(i=>`<option value="${i.id}">${i.name}</option>`).join('');
+    
+    if(citySelect) citySelect.innerHTML = '<option value="">Select City</option>' + 
+        c.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
+    
+    if(serviceSelect) serviceSelect.innerHTML = '<option value="">Select Service</option>' + 
+        s.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
+    
     refreshBookings();
 }
 
+
 document.getElementById('findBtn').onclick = async () => {
-    const { data: p } = await supabase.from('providers').select('*').eq('city_id', citySelect.value).eq('service_id', serviceSelect.value);
-    resultsSection.classList.remove('hidden');
+    const { data: p } = await supabase.from('providers').select('*')
+        .eq('city_id', citySelect.value)
+        .eq('service_id', serviceSelect.value);
+    
+    document.getElementById('resultsSection').classList.remove('hidden');
     providerList.innerHTML = p.length ? p.map(i => `
         <div class="provider-card">
-            <div><b>${i.name}</b><br><small>${i.experience || 'N/A'} Exp</small></div>
+            <div><b>${i.name}</b></div>
             <button class="main-btn" style="width:auto; padding:8px" onclick="window.bookProvider('${i.id}','${i.name}')">Book</button>
         </div>`).join('') : '<p>No experts found.</p>';
 };
+
 
 window.bookProvider = async (id, name) => {
     const { value: f } = await Swal.fire({
@@ -40,21 +51,27 @@ window.bookProvider = async (id, name) => {
     }
 };
 
+
 document.getElementById('providerLoginBtn').onclick = async () => {
     const ph = document.getElementById('providerPhone').value.trim();
     const { data: pList } = await supabase.from('providers').select('*').eq('phone', ph);
+    
     if(pList && pList.length > 0) {
-        const p = pList[0];
         document.getElementById('loginArea').classList.add('hidden');
         document.getElementById('providerDashboard').classList.remove('hidden');
-        document.getElementById('welcomeMsg').innerText = "Welcome, " + p.name;
-        loadProvBookings(p.id);
-    } else { Swal.fire('Error', 'Provider Not Found', 'error'); }
+        document.getElementById('welcomeMsg').innerText = "Welcome, " + pList[0].name;
+        loadProvBookings(pList[0].id);
+    } else { 
+        Swal.fire('Error', 'Provider Not Found', 'error'); 
+    }
 };
+
 
 async function loadProvBookings(pid) {
     const { data: b } = await supabase.from('bookings').select('*, services(name)')
-        .eq('provider_id', pid).neq('status', 'completed');
+        .eq('provider_id', pid)
+        .neq('status', 'completed');
+
     const list = document.getElementById('providerBookings');
     list.innerHTML = b.length ? b.map(i => `
         <div class="provider-card" style="flex-direction:column; align-items:start;">
@@ -67,15 +84,18 @@ async function loadProvBookings(pid) {
         </div>`).join('') : '<p>No active bookings.</p>';
 }
 
+
 window.updStatus = async (bid, st, pid) => {
     await supabase.from('bookings').update({ status: st }).eq('id', bid);
-    Swal.fire({title: 'Updated!', icon: 'success', timer: 1000, showConfirmButton: false});
     loadProvBookings(pid);
     refreshBookings();
 };
 
+
 async function refreshBookings() {
-    const { data: b } = await supabase.from('bookings').select('*, services(name), providers(name)').order('created_at', {ascending: false}).limit(5);
+    const { data: b } = await supabase.from('bookings').select('*, services(name), providers(name)')
+        .order('created_at', {ascending: false}).limit(5);
+    
     const activityList = document.getElementById('myBookings');
     if(activityList && b) {
         activityList.innerHTML = b.map(i => `
@@ -85,5 +105,6 @@ async function refreshBookings() {
             </div>`).join('');
     }
 }
+
 init();
-                                                                                          
+    
