@@ -47,29 +47,51 @@ document.getElementById('findBtn').onclick = async () => {
 
 // 3. Booking Logic
 window.bookProvider = async (id, name) => {
-    const { value: f } = await Swal.fire({
-        title: 'Booking: ' + name,
-        html: '<input id="n" class="swal2-input" placeholder="Aapka Naam"><input id="p" class="swal2-input" placeholder="Mobile Number" maxlength="10">',
+    // 1. Booking Form Popup (Yahan "Aapka Naam" ko English kiya hai)
+    const { value: formValues } = await Swal.fire({
+        title: `Booking: ${name}`, // Ye waisa hi rahega jaisa aapne pucha
+        html:
+            `<input id="swal-input1" class="swal2-input" placeholder="Full Name">` +
+            `<input id="swal-input2" class="swal2-input" placeholder="Mobile Number" type="tel">`,
+        focusConfirm: false,
+        confirmButtonText: 'Confirm',
+        confirmButtonColor: '#3b82f6',
         preConfirm: () => {
-            const n = document.getElementById('n').value;
-            const p = document.getElementById('p').value;
-            if(!n || p.length < 10) return Swal.showValidationMessage('Naam aur 10-digit Phone sahi se dalo');
-            return [n, p];
+            const customer_name = document.getElementById('swal-input1').value;
+            const customer_phone = document.getElementById('swal-input2').value;
+            if (!customer_name || !customer_phone) {
+                Swal.showValidationMessage('Please enter your details');
+            }
+            return { customer_name, customer_phone };
         }
     });
 
-    if (f) {
-        await supabase.from('bookings').insert([{ 
-            user_name: f[0], user_phone: f[1], 
-            city_id: document.getElementById('citySelect').value, 
-            service_id: document.getElementById('serviceSelect').value, 
-            provider_id: id, status: 'pending' 
-        }]);
-        Swal.fire('Done!', 'Expert aapko call karega.', 'success');
-        refreshBookings();
+    if (formValues) {
+        const { data, error } = await supabase
+            .from('bookings')
+            .insert([{ 
+                provider_id: id, 
+                customer_name: formValues.customer_name, 
+                customer_phone: formValues.customer_phone,
+                status: 'pending' 
+            }]);
+
+        if (error) {
+            Swal.fire('Error', 'Something went wrong!', 'error');
+        } else {
+            // 2. Success Message Popup (Yahan "Expert call karega" ko English kiya hai)
+            Swal.fire({
+                icon: 'success',
+                title: 'Done!',
+                text: 'Our expert will contact you shortly.',
+                confirmButtonText: 'Great!',
+                confirmButtonColor: '#3b82f6'
+            });
+            refreshBookings();
+        }
     }
 };
-
+        
 // 4. Provider Dashboard Login
 document.getElementById('providerLoginBtn').onclick = async () => {
     const ph = document.getElementById('providerPhone').value.trim();
