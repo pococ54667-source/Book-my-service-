@@ -40,7 +40,6 @@ findBtn.onclick = async () => {
 
     renderProviders(providers);
 };
-
 function renderProviders(providers) {
     resultsSection.classList.remove('hidden');
     providerList.innerHTML = providers.length ? '' : '<p style="color:#94a3b8">No experts found here yet.</p>';
@@ -48,60 +47,17 @@ function renderProviders(providers) {
     providers.forEach(p => {
         const div = document.createElement('div');
         div.className = 'provider-card';
+        // Rating agar undefined hai toh 5.0 dikhane ke liye logic
+        const displayRating = p.rating ? p.rating : '5.0'; 
+        
         div.innerHTML = `
             <div>
                 <div style="font-weight:700">${p.name}</div>
-                <div style="font-size:0.8rem; color:#94a3b8">${p.experience} Exp • ⭐ ${p.rating}</div>
+                <div style="font-size:0.8rem; color:#94a3b8">${p.experience || 'N/A'} Exp • ⭐ ${displayRating}</div>
             </div>
-            <button class="main-btn" style="width:auto; padding:8px 16px" onclick="bookProvider('${p.id}', '${p.name}')">Book</button>
+            <button class="main-btn" style="width:auto; padding:8px 16px" onclick="window.bookProvider('${p.id}', '${p.name}')">Book</button>
         `;
         providerList.appendChild(div);
     });
-}
-
-window.bookProvider = async (pId, pName) => {
-    const { value: formValues } = await Swal.fire({
-        title: `Book ${pName}`,
-        html: `<input id="swal-name" class="swal2-input" placeholder="Your Name">
-               <input id="swal-phone" class="swal2-input" placeholder="WhatsApp Number">`,
-        focusConfirm: false,
-        background: '#1e293b', color: '#fff',
-        confirmButtonText: 'Confirm Booking',
-        preConfirm: () => [document.getElementById('swal-name').value, document.getElementById('swal-phone').value]
-    });
-
-    if (formValues && formValues[0] && formValues[1]) {
-        const { error } = await supabase.from('bookings').insert([{
-            user_name: formValues[0], user_phone: formValues[1],
-            city_id: citySelect.value, service_id: serviceSelect.value,
-            provider_id: pId, status: 'pending'
-        }]);
-
-        if(!error) {
-            Swal.fire({ title: 'Success!', text: 'Provider will call you soon.', icon: 'success', background: '#1e293b', color: '#fff' });
-            refreshBookings();
         }
-    }
-};
 
-async function refreshBookings() {
-    const { data: bookings } = await supabase
-        .from('bookings')
-        .select('*, services(name), providers(name)')
-        .order('created_at', { ascending: false }).limit(5);
-
-    if(bookings?.length) {
-        myBookings.innerHTML = bookings.map(b => `
-            <div class="provider-card" style="margin-bottom:10px">
-                <div>
-                    <div style="font-size:0.9rem; font-weight:600">${b.services?.name}</div>
-                    <div style="font-size:0.7rem; color:#94a3b8">${b.providers?.name}</div>
-                </div>
-                <span class="badge ${b.status}">${b.status}</span>
-            </div>
-        `).join('');
-    }
-}
-
-init();
-        
