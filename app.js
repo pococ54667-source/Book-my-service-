@@ -12,7 +12,7 @@ const icons = {
     "Painter": "fa-paint-roller"
 };
 
-// 1. App Load hote hi Data lao
+// 1. Initialize App Data
 async function init() {
     try {
         const { data: c } = await supabase.from('cities').select('*');
@@ -28,12 +28,19 @@ async function init() {
     } catch (e) { console.error("Load Error:", e); }
 }
 
-// 2. Expert Dhundo (Validation ke sath)
+// 2. Search Experts (With Professional Validation)
 document.getElementById('findBtn').onclick = async () => {
     const city = document.getElementById('citySelect').value;
     const service = document.getElementById('serviceSelect').value;
 
-    if(!city || !service) return Swal.fire('Ruko!', 'City aur Service dono select karo.', 'warning');
+    if(!city || !service) {
+        return Swal.fire({
+            title: 'Action Required',
+            text: 'Please select both City and Service to continue.',
+            icon: 'info',
+            confirmButtonColor: '#3b82f6'
+        });
+    }
 
     const { data: p } = await supabase.from('providers').select('*').eq('city_id', city).eq('service_id', service);
     
@@ -42,32 +49,31 @@ document.getElementById('findBtn').onclick = async () => {
         <div class="provider-card">
             <div><i class="fas fa-user-check"></i> <b>${i.name}</b></div>
             <button class="main-btn" style="width:auto; padding:8px" onclick="window.bookProvider('${i.id}','${i.name}')">Book Now</button>
-        </div>`).join('') : '<p>Koi expert nahi mila.</p>';
+        </div>`).join('') : '<p style="padding:10px; color:#94a3b8;">No experts found in this area.</p>';
 };
 
-// 3. Booking Logic
+// 3. Booking Logic (Professional English)
 window.bookProvider = async (id, name) => {
-    // 1. Booking Form Popup (Yahan "Aapka Naam" ko English kiya hai)
     const { value: formValues } = await Swal.fire({
-        title: `Booking: ${name}`, // Ye waisa hi rahega jaisa aapne pucha
+        title: `Booking: ${name}`,
         html:
             `<input id="swal-input1" class="swal2-input" placeholder="Full Name">` +
             `<input id="swal-input2" class="swal2-input" placeholder="Mobile Number" type="tel">`,
         focusConfirm: false,
-        confirmButtonText: 'Confirm',
+        confirmButtonText: 'Confirm Booking',
         confirmButtonColor: '#3b82f6',
         preConfirm: () => {
             const customer_name = document.getElementById('swal-input1').value;
             const customer_phone = document.getElementById('swal-input2').value;
             if (!customer_name || !customer_phone) {
-                Swal.showValidationMessage('Please enter your details');
+                Swal.showValidationMessage('Please provide your name and contact number');
             }
             return { customer_name, customer_phone };
         }
     });
 
     if (formValues) {
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('bookings')
             .insert([{ 
                 provider_id: id, 
@@ -77,14 +83,13 @@ window.bookProvider = async (id, name) => {
             }]);
 
         if (error) {
-            Swal.fire('Error', 'Something went wrong!', 'error');
+            Swal.fire('Error', 'Unable to process booking. Try again.', 'error');
         } else {
-            // 2. Success Message Popup (Yahan "Expert call karega" ko English kiya hai)
             Swal.fire({
                 icon: 'success',
-                title: 'Done!',
-                text: 'Our expert will contact you shortly.',
-                confirmButtonText: 'Great!',
+                title: 'Success!',
+                text: 'Your request has been placed. An expert will contact you soon.',
+                confirmButtonText: 'Understood',
                 confirmButtonColor: '#3b82f6'
             });
             refreshBookings();
@@ -102,33 +107,39 @@ document.getElementById('providerLoginBtn').onclick = async () => {
         document.getElementById('providerDashboard').classList.remove('hidden');
         document.getElementById('welcomeMsg').innerText = "Welcome, " + pList[0].name;
         loadProvBookings(pList[0].id);
-    } else { Swal.fire('Error', 'Mobile number galat hai.', 'error'); }
+    } else { 
+        Swal.fire('Access Denied', 'Invalid mobile number. Please check and try again.', 'error'); 
+    }
 };
 
-// 5. Status Update (Professional Logic)
+// 5. Provider Portal Updates
 async function loadProvBookings(pid) {
     const { data: b } = await supabase.from('bookings').select('*, services(name)').eq('provider_id', pid).neq('status', 'completed');
     document.getElementById('providerBookings').innerHTML = b.length ? b.map(i => `
         <div class="provider-card" style="flex-direction:column; align-items:start;">
-            <b>${i.services?.name} - ${i.user_name}</b>
-            <div style="font-size:0.8rem; margin:5px 0;">Phone: ${i.user_phone}</div>
+            <b>${i.services?.name} - ${i.customer_name}</b>
+            <div style="font-size:0.8rem; margin:5px 0;">Contact: ${i.customer_phone}</div>
             <div style="display:flex; gap:10px; margin-top:10px;">
                 <button onclick="window.updStatus('${i.id}','confirmed','${pid}')" class="main-btn" style="padding:5px; background:#1e40af;">Confirm</button>
-                <button onclick="window.updStatus('${i.id}','completed','${pid}')" class="main-btn" style="padding:5px; background:#16a34a;">Done</button>
+                <button onclick="window.updStatus('${i.id}','completed','${pid}')" class="main-btn" style="padding:5px; background:#16a34a;">Mark Done</button>
             </div>
-        </div>`).join('') : '<p>Abhi koi naya kaam nahi hai.</p>';
+        </div>`).join('') : '<p style="color:#94a3b8;">No active service requests.</p>';
 }
 
 window.updStatus = async (bid, st, pid) => {
     await supabase.from('bookings').update({ status: st }).eq('id', bid);
-    if(st === 'completed') Swal.fire('Mubarak Ho!', 'Kaam khatam ho gaya.', 'success');
+    if(st === 'completed') Swal.fire('Completed', 'Service has been marked as finished.', 'success');
     loadProvBookings(pid);
     refreshBookings();
 };
 
-// 6. Recent Activity Refresh
+// 6. Recent Activity (Smart Sense: Limit to 3 items only)
 async function refreshBookings() {
-    const { data: b } = await supabase.from('bookings').select('*, services(name), providers(name)').order('created_at', {ascending: false}).limit(5);
+    const { data: b } = await supabase.from('bookings')
+        .select('*, services(name), providers(name)')
+        .order('created_at', {ascending: false})
+        .limit(3); // SIRF 3 TAK LIMIT KIYA TAKI PAGE LAMBA NA HO
+
     if(b) {
         document.getElementById('myBookings').innerHTML = b.map(i => {
             const icon = icons[i.services?.name] || "fa-tools";
@@ -141,4 +152,4 @@ async function refreshBookings() {
 }
 
 init();
-    
+            
