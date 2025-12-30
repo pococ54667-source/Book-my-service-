@@ -79,7 +79,7 @@ async function refreshBookings() {
     }
 }
 init();
-     // Provider Login & Dashboard Logic
+     
 const loginArea = document.getElementById('loginArea');
 const providerDashboard = document.getElementById('providerDashboard');
 const providerPhoneInput = document.getElementById('providerPhone');
@@ -90,7 +90,7 @@ providerLoginBtn.onclick = async () => {
     const phone = providerPhoneInput.value;
     if(!phone) return Swal.fire('Error', 'Please enter your phone number', 'error');
 
-    // Check if provider exists
+
     const { data: provider, error } = await supabase
         .from('providers')
         .select('*')
@@ -101,7 +101,7 @@ providerLoginBtn.onclick = async () => {
         return Swal.fire('Error', 'Provider not found with this number', 'error');
     }
 
-    // Login Success
+    
     loginArea.classList.add('hidden');
     providerDashboard.classList.remove('hidden');
     document.getElementById('welcomeMsg').innerText = `Welcome, ${provider.name}`;
@@ -138,7 +138,6 @@ async function loadProviderBookings(pId) {
     `).join('');
 }
 
-// Status Update Function
 window.updateStatus = async (bookingId, newStatus, pId) => {
     const { error } = await supabase
         .from('bookings')
@@ -147,8 +146,8 @@ window.updateStatus = async (bookingId, newStatus, pId) => {
 
     if(!error) {
         Swal.fire('Updated', `Booking marked as ${newStatus}`, 'success');
-        loadProviderBookings(pId); // List refresh
-        refreshBookings(); // User side refresh
+        loadProviderBookings(pId); 
+        refreshBookings(); 
     }
 };
        
