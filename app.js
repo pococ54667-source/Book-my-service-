@@ -4,128 +4,78 @@ const SUPABASE_URL = "https://hjpvadozhrdjugfrcffv.supabase.co";
 const SUPABASE_KEY = "sb_publishable_VWRFCLxoBE75MYve7W5jhw_PedtT83O";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Elements
 const citySelect = document.getElementById('citySelect');
 const serviceSelect = document.getElementById('serviceSelect');
-const findBtn = document.getElementById('findBtn');
 const providerList = document.getElementById('providerList');
 const resultsSection = document.getElementById('resultsSection');
-const myBookings = document.getElementById('myBookings');
-const loginArea = document.getElementById('loginArea');
-const providerDashboard = document.getElementById('providerDashboard');
-const providerPhoneInput = document.getElementById('providerPhone');
-const providerLoginBtn = document.getElementById('providerLoginBtn');
-const providerBookingsList = document.getElementById('providerBookings');
 
-// 1. Initial Load (City & Services)
 async function init() {
-    const { data: cities } = await supabase.from('cities').select('*');
-    const { data: services } = await supabase.from('services').select('*');
-
-    if (citySelect) {
-        citySelect.innerHTML = '<option value="">Select City</option>';
-        cities?.forEach(c => citySelect.innerHTML += `<option value="${c.id}">${c.name}</option>`);
-    }
-    
-    if (serviceSelect) {
-        serviceSelect.innerHTML = '<option value="">Select Service</option>';
-        services?.forEach(s => serviceSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`);
-    }
-    
+    const { data: c } = await supabase.from('cities').select('*');
+    const { data: s } = await supabase.from('services').select('*');
+    citySelect.innerHTML = '<option value="">Select City</option>' + c.map(i=>`<option value="${i.id}">${i.name}</option>`).join('');
+    serviceSelect.innerHTML = '<option value="">Select Service</option>' + s.map(i=>`<option value="${i.id}">${i.name}</option>`).join('');
     refreshBookings();
 }
 
-// 2. Find Providers
-findBtn.onclick = async () => {
-    const { data: providers } = await supabase.from('providers').select('*')
-        .eq('city_id', citySelect.value).eq('service_id', serviceSelect.value);
-    renderProviders(providers);
-};
-
-function renderProviders(providers) {
+document.getElementById('findBtn').onclick = async () => {
+    const { data: p } = await supabase.from('providers').select('*').eq('city_id', citySelect.value).eq('service_id', serviceSelect.value);
     resultsSection.classList.remove('hidden');
-    providerList.innerHTML = providers.length ? '' : '<p>No experts found.</p>';
-    providers.forEach(p => {
-        const div = document.createElement('div');
-        div.className = 'provider-card';
-        div.innerHTML = `
-            <div>
-                <div style="font-weight:700">${p.name}</div>
-                <div style="font-size:0.8rem; color:#94a3b8">${p.experience || 'N/A'} Exp</div>
-            </div>
-            <button class="main-btn" style="width:auto; padding:8px 16px" 
-                onclick="window.bookProvider('${p.id}', '${p.name}')">Book Now</button>`;
-        providerList.appendChild(div);
-    });
-}
+    providerList.innerHTML = p.length ? p.map(i => `
+        <div class="provider-card">
+            <div><b>${i.name}</b><br><small>${i.experience || 'N/A'} Exp</small></div>
+            <button class="main-btn" style="width:auto; padding:8px" onclick="window.bookProvider('${i.id}','${i.name}')">Book</button>
+        </div>`).join('') : '<p>No experts found.</p>';
+};
 
-// 3. Booking Logic
-window.bookProvider = async (pId, pName) => {
-    const { value: formValues } = await Swal.fire({
-        title: `Book ${pName}`,
-        html: `<input id="swal-name" class="swal2-input" placeholder="Your Name">
-               <input id="swal-phone" class="swal2-input" placeholder="WhatsApp Number">`,
-        background: '#1e293b', color: '#fff',
-        preConfirm: () => [document.getElementById('swal-name').value, document.getElementById('swal-phone').value]
+window.bookProvider = async (id, name) => {
+    const { value: f } = await Swal.fire({
+        title: 'Book ' + name,
+        html: '<input id="n" class="swal2-input" placeholder="Name"><input id="p" class="swal2-input" placeholder="Phone">',
+        preConfirm: () => [document.getElementById('n').value, document.getElementById('p').value]
     });
-
-    if (formValues && formValues[0] && formValues[1]) {
-        const { error } = await supabase.from('bookings').insert([{
-            user_name: formValues[0], user_phone: formValues[1],
-            city_id: citySelect.value, service_id: serviceSelect.value,
-            provider_id: pId, status: 'pending'
-        }]);
-        if(!error) { 
-            Swal.fire({title:'Success', icon:'success', background:'#1e293b', color:'#fff'}); 
-            refreshBookings(); 
-        }
+    if (f && f[0] && f[1]) {
+        await supabase.from('bookings').insert([{ user_name: f[0], user_phone: f[1], city_id: citySelect.value, service_id: serviceSelect.value, provider_id: id, status: 'pending' }]);
+        Swal.fire('Success', 'Booking Done', 'success');
+        refreshBookings();
     }
 };
 
-// 4. Provider Login Logic
-providerLoginBtn.onclick = async () => {
-    const phone = providerPhoneInput.value;
-    const { data: provider, error } = await supabase.from('providers').select('*').eq('phone', phone).single();
-
-    if(error || !provider) {
-        return Swal.fire('Error', 'Provider not found', 'error');
-    }
-
-    loginArea.classList.add('hidden');
-    providerDashboard.classList.remove('hidden');
-    document.getElementById('welcomeMsg').innerText = `Welcome, ${provider.name}`;
-    loadProviderBookings(provider.id);
+document.getElementById('providerLoginBtn').onclick = async () => {
+    const ph = document.getElementById('providerPhone').value;
+    const { data: p } = await supabase.from('providers').select('*').eq('phone', ph).single();
+    if(p) {
+        document.getElementById('loginArea').classList.add('hidden');
+        document.getElementById('providerDashboard').classList.remove('hidden');
+        document.getElementById('welcomeMsg').innerText = "Welcome, " + p.name;
+        loadProvBookings(p.id);
+    } else { Swal.fire('Error', 'Not Found', 'error'); }
 };
 
-async function loadProviderBookings(pId) {
-    const { data: bookings } = await supabase.from('bookings').select('*, services(name)').eq('provider_id', pId);
-    providerBookingsList.innerHTML = bookings.map(b => `
-        <div class="provider-card" style="flex-direction:column; align-items:flex-start;">
-            <b>${b.services?.name} - ${b.user_name}</b>
-            <span>Status: ${b.status}</span>
-            <div style="display:flex; gap:10px; margin-top:5px;">
-                <button onclick="updateStatus('${b.id}', 'confirmed', ${pId})" class="main-btn" style="padding:5px">Confirm</button>
-                <button onclick="updateStatus('${b.id}', 'completed', ${pId})" class="main-btn" style="padding:5px; background:green">Done</button>
+async function loadProvBookings(pid) {
+    const { data: b } = await supabase.from('bookings').select('*, services(name)').eq('provider_id', pid);
+    document.getElementById('providerBookings').innerHTML = b.map(i => `
+        <div class="provider-card" style="flex-direction:column; align-items:start;">
+            <b>${i.services.name} - ${i.user_name}</b>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button onclick="window.updStatus('${i.id}','confirmed','${pid}')" class="main-btn" style="padding:5px">Confirm</button>
+                <button onclick="window.updStatus('${i.id}','completed','${pid}')" class="main-btn" style="padding:5px; background:green">Done</button>
             </div>
         </div>`).join('');
 }
 
-window.updateStatus = async (bookingId, newStatus, pId) => {
-    await supabase.from('bookings').update({ status: newStatus }).eq('id', bookingId);
-    loadProviderBookings(pId);
+window.updStatus = async (bid, st, pid) => {
+    await supabase.from('bookings').update({ status: st }).eq('id', bid);
+    loadProvBookings(pid);
     refreshBookings();
 };
 
 async function refreshBookings() {
-    const { data: bookings } = await supabase.from('bookings').select('*, services(name), providers(name)').order('created_at', { ascending: false });
-    if(myBookings && bookings) {
-        myBookings.innerHTML = bookings.map(b => `
-            <div class="provider-card">
-                <div><b>${b.services?.name}</b><br><small>${b.providers?.name}</small></div>
-                <span class="badge ${b.status}">${b.status}</span>
-            </div>`).join('');
-    }
+    const { data: b } = await supabase.from('bookings').select('*, services(name), providers(name)').order('created_at', {ascending: false}).limit(5);
+    document.getElementById('myBookings').innerHTML = b.map(i => `
+        <div class="provider-card">
+            <div><b>${i.services?.name}</b><br><small>${i.providers?.name}</small></div>
+            <span class="badge ${i.status}">${i.status}</span>
+        </div>`).join('');
 }
-
 init();
         
