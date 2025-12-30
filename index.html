@@ -3,14 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BookMyService | Premium</title>
+    <title>BookMyService | Professional</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();</script>
 </head>
 <body class="dark-theme">
-
     <nav class="navbar">
         <div class="logo">Book<span>My</span>Service</div>
     </nav>
@@ -18,17 +15,16 @@
     <div class="container">
         <header class="hero">
             <h1>Expert Services, <span>One Tap Away.</span></h1>
-            <p>Find the highest-rated professionals in your city.</p>
         </header>
 
         <section class="search-card card">
             <div class="input-group">
                 <label>Location</label>
-                <select id="citySelect"><option value="">Detecting City...</option></select>
+                <select id="citySelect"><option value="">Loading...</option></select>
             </div>
             <div class="input-group">
                 <label>Service Needed</label>
-                <select id="serviceSelect"><option value="">What do you need?</option></select>
+                <select id="serviceSelect"><option value="">Loading...</option></select>
             </div>
             <button id="findBtn" class="main-btn">Find Experts</button>
         </section>
@@ -38,22 +34,27 @@
             <div id="providerList" class="provider-grid"></div>
         </section>
 
-        <section class="booking-section">
+        <section class="card">
             <h3 class="section-title">Recent Activity</h3>
-            <section class="card provider-login-section">
-    <h3 class="section-title">Provider Dashboard</h3>
-    <div id="loginArea">
-        <div class="input-group">
-            <label>Provider Phone Number</label>
-            <input type="tel" id="providerPhone" placeholder="Enter your registered phone">
-        </div>
-        <button id="providerLoginBtn" class="main-btn">Login as Provider</button>
+            <div id="myBookings" class="booking-list"></div>
+        </section>
+
+        <section class="card" style="margin-top: 20px; border-top: 2px solid #3b82f6;">
+            <h3 class="section-title">Provider Dashboard</h3>
+            <div id="loginArea">
+                <div class="input-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="providerPhone" placeholder="Enter Registered Phone">
+                </div>
+                <button id="providerLoginBtn" class="main-btn">Login as Provider</button>
+            </div>
+            <div id="providerDashboard" class="hidden">
+                <h4 id="welcomeMsg" style="color:#3b82f6"></h4>
+                <div id="providerBookings" class="booking-list"></div>
+                <button onclick="location.reload()" class="main-btn" style="background:#475569; margin-top:10px;">Logout</button>
+            </div>
+        </section>
     </div>
-    
-    <div id="providerDashboard" class="hidden">
-        <h4 id="welcomeMsg">Welcome</h4>
-        <div id="providerBookings" class="booking-list"></div>
-        <button onclick="location.reload()" class="main-btn" style="background:#475569; margin-top:10px;">Logout</button>
-    </div>
-            </section>
-            
+    <script type="module" src="app.js"></script>
+</body>
+</html>
