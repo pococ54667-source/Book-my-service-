@@ -50,6 +50,7 @@ document.getElementById('providerLoginBtn').onclick = async () => {
         loadProvBookings(p.id);
     } else { Swal.fire('Error', 'Not Found', 'error'); }
 };
+
 async function loadProvBookings(pid) {
     const { data: b } = await supabase.from('bookings').select('*, services(name)')
         .eq('provider_id', pid).neq('status', 'completed');
