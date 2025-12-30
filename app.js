@@ -53,34 +53,16 @@ document.getElementById('findBtn').onclick = async () => {
 };
 
 // 3. Booking Logic
-window.bookProvider = async (id, name) => {
-    const { value: formValues } = await Swal.fire({
-        title: `Booking: ${name}`,
-        html:
-            `<input id="swal-input1" class="swal2-input" placeholder="Full Name">` +
-            `<input id="swal-input2" class="swal2-input" placeholder="Mobile Number" type="tel">`,
-        focusConfirm: false,
-        confirmButtonText: 'Confirm Booking',
-        confirmButtonColor: '#3b82f6',
-        preConfirm: () => {
-            const customer_name = document.getElementById('swal-input1').value;
-            const customer_phone = document.getElementById('swal-input2').value;
-            if (!customer_name || !customer_phone) {
-                Swal.showValidationMessage('Please provide your name and contact number');
-            }
-            return { customer_name, customer_phone };
-        }
-    });
-
-    if (formValues) {
-        const { error } = await supabase
-            .from('bookings')
-            .insert([{ 
-                provider_id: id, 
-                customer_name: formValues.customer_name, 
-                customer_phone: formValues.customer_phone,
-                status: 'pending' 
-            }]);
+const { error } = await supabase
+    .from('bookings')
+    .insert([{ 
+        provider_id: id, 
+        user_name: formValues.user_name, 
+        user_phone: formValues.user_phone,
+        city_id: document.getElementById('citySelect').value,
+        service_id: document.getElementById('serviceSelect').value,
+        status: 'pending' 
+    }]);
 
         if (error) {
             Swal.fire('Error', 'Unable to process booking. Try again.', 'error');
